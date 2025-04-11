@@ -1,4 +1,4 @@
-package com.lkrs.portfolio_be;
+package com.lkrs.portfoliobe;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

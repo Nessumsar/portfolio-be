@@ -1,4 +1,4 @@
-package com.lkrs.portfolio_be;
+package com.lkrs.portfoliobe;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
