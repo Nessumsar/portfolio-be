@@ -1,8 +1,8 @@
 package com.lkrs.portfoliobe.rest;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.lkrs.portfoliobe.model.Repository;
 import com.lkrs.portfoliobe.service.RepositoryService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,14 +11,17 @@ import java.util.List;
 @RequestMapping("/api")
 public class RepositoryController {
 
-    @Autowired
     private RepositoryService repositoryService;
 
+    public RepositoryController(RepositoryService repositoryService) {
+        this.repositoryService = repositoryService;
+    }
+
     @GetMapping("/repository")
-    public List<Repository> getAll() {
+    public List<Repository> getAll() throws JsonProcessingException {
 
 
-        return null;
+        return repositoryService.getRepositories();
     }
 
 }
