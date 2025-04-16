@@ -14,15 +14,15 @@ import java.util.List;
 @RequestMapping("/api")
 public class RepositoryController {
 
-    private RepositoryService repositoryService;
+    private final RepositoryService repositoryService;
 
     public RepositoryController(RepositoryService repositoryService) {
         this.repositoryService = repositoryService;
     }
 
     @GetMapping("/repository")
-    public ResponseEntity<?> getAll() {
-        List<Repository> result = repositoryService.getRepositories();
+    public ResponseEntity<?> getLatestSix() {
+        List<Repository> result = repositoryService.getLatestSixRepositories();
         if (result.isEmpty()) {
             return new ResponseEntity<>("No repositories found.", HttpStatus.NOT_FOUND);
         }
