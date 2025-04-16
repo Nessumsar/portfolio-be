@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -21,7 +22,7 @@ public class RepositoryService {
     private final String GITLAB_URL = "https://gitlab.com/api/v4/users/Nessumsar/projects";
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    public List<Repository>  getRepositories() throws JsonProcessingException {
+    public List<Repository>  getRepositories() {
         List<Repository> githubRepos = getRepositoriesFromHost(Platform.GITHUB);
         List<Repository> gitlabRepos = getRepositoriesFromHost(Platform.GITLAB);
 
@@ -29,32 +30,32 @@ public class RepositoryService {
         allRepos.addAll(githubRepos);
         allRepos.addAll(gitlabRepos);
 
-        //Sort by date
-        return allRepos;
+        return allRepos.stream().sorted(Comparator.comparing(Repository::getLastUpdated).reversed()).toList();
     }
 
-    private List<Repository> getRepositoriesFromHost(Platform platform) throws JsonProcessingException {
-        String url = platform.equals(Platform.GITHUB) ? GITHUB_URL : GITLAB_URL;
-
+    private List<Repository> getRepositoriesFromHost(Platform platform) {
+        List<Repository> repositories;
         RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<String> apiReponse = restTemplate.getForEntity(url, String.class);
-        if (apiReponse.getStatusCode() != HttpStatus.OK) {
-            //Throw something
-            log.warn("ApiResponse code is not 200: {}", apiReponse.getStatusCode());
-            return null;
+
+        String url = platform.equals(Platform.GITHUB) ? GITHUB_URL : GITLAB_URL;
+        ResponseEntity<String> apiResponse = restTemplate.getForEntity(url, String.class);
+        if (apiResponse.getStatusCode() != HttpStatus.OK) {
+            log.warn("ApiResponse code is not 200: {}", apiResponse.getStatusCode());
+            return new ArrayList<>();
         }
 
-        List<Repository> repositories = objectMapper.readValue(apiReponse.getBody(), new TypeReference<List<Repository>>(){});
+        try {
+            repositories = objectMapper.readValue(apiResponse.getBody(), new TypeReference<>() {});
+        } catch (JsonProcessingException e) {
+            log.warn("JsonProcessingException: {}", e);
+            return new ArrayList<>();
+        }
+
         if (repositories.isEmpty()) {
-            //Throw something
             log.warn("Repository is empty");
         }
-
         repositories.forEach(repo -> repo.setPlatform(platform));
-
-        log.warn("Repo 1: {}",repositories.getFirst().toString());
         return repositories;
     }
-
 
 }
