@@ -30,7 +30,14 @@ public class RepositoryService {
         allRepos.addAll(githubRepos);
         allRepos.addAll(gitlabRepos);
 
-        return allRepos.stream().sorted(Comparator.comparing(Repository::getLastUpdated).reversed()).toList();
+        for (Repository repo : allRepos) {
+            log.info("Repo {}", repo);
+        }
+
+        return allRepos.stream()
+                .sorted(Comparator.comparing(Repository::getLastUpdated).reversed())
+                .limit(6)
+                .toList();
     }
 
     private List<Repository> getRepositoriesFromHost(Platform platform) {
