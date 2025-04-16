@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -20,9 +22,24 @@ import java.util.List;
 public class RepositoryService {
     private final String GITHUB_URL = "https://api.github.com/users/Nessumsar/repos";
     private final String GITLAB_URL = "https://gitlab.com/api/v4/users/Nessumsar/projects";
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper;
 
-    public List<Repository>  getRepositories() {
+    public RepositoryService(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
+    public List<Repository> getLatestSixRepositories() {
+        List<Repository> allRepos = getAllRepositories();
+        return filterForLatestSixRepositories(allRepos);
+    }
+
+    public List<Repository> getRepositoriesUpdatedWithinOneYear() {
+        List<Repository> allRepos = getAllRepositories();
+        return filterForUpdatedWithinOneYear(allRepos);
+    }
+
+
+    public List<Repository>  getAllRepositories() {
         List<Repository> githubRepos = getRepositoriesFromHost(Platform.GITHUB);
         List<Repository> gitlabRepos = getRepositoriesFromHost(Platform.GITLAB);
 
@@ -34,10 +51,7 @@ public class RepositoryService {
             log.info("Repo {}", repo);
         }
 
-        return allRepos.stream()
-                .sorted(Comparator.comparing(Repository::getLastUpdated).reversed())
-                .limit(6)
-                .toList();
+        return allRepos;
     }
 
     private List<Repository> getRepositoriesFromHost(Platform platform) {
@@ -65,4 +79,19 @@ public class RepositoryService {
         return repositories;
     }
 
+    private List<Repository> filterForLatestSixRepositories(List<Repository> repositories) {
+        return repositories.stream()
+                .sorted(Comparator.comparing(Repository::getLastUpdated).reversed())
+                .limit(6)
+                .toList();
+    }
+
+    private List<Repository> filterForUpdatedWithinOneYear(List<Repository> repositories) {
+        ZonedDateTime oneYearAgo = ZonedDateTime.now().minusDays(365);
+        LocalDateTime.now();
+        return repositories.stream()
+                .sorted(Comparator.comparing(Repository::getLastUpdated).reversed())
+                .filter(repository -> repository.getLastUpdated().isAfter(oneYearAgo))
+                .toList();
+    }
 }
