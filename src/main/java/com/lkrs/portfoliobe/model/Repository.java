@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
-import java.util.Date;
+import java.time.ZonedDateTime;
 
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -14,7 +14,7 @@ public class Repository {
     @JsonAlias({"html_url", "web_url"})
     private String htmlUrl;
     @JsonAlias({"updated_at", "last_activity_at"})
-    private Date lastUpdated;
+    private ZonedDateTime lastUpdated;
     private String description;
     private String language;
     private Platform platform;
