@@ -9,13 +9,13 @@ import java.util.Date;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Repository {
-    int id;
-    String name;
+    private int id;
+    private String name;
     @JsonAlias({"html_url", "web_url"})
-    String url;
+    private String url;
     @JsonAlias({"updated_at", "last_activity_at"})
-    Date lastUpdated;
-    String description;
-    String language;
-    Platform platform;
+    private Date lastUpdated;
+    private String description;
+    private String language;
+    private Platform platform;
 }
