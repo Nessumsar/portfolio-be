@@ -12,7 +12,7 @@ public class Repository {
     private int id;
     private String name;
     @JsonAlias({"html_url", "web_url"})
-    private String url;
+    private String htmlUrl;
     @JsonAlias({"updated_at", "last_activity_at"})
     private Date lastUpdated;
     private String description;
