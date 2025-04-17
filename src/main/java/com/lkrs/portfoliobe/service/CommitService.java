@@ -90,6 +90,9 @@ public class CommitService {
             if (!"Nessumsar".equals(author)) {
                 continue;
             }
+            if (json.get("title").asText().contains("Merge remote-tracking branch")) {
+                continue;
+            }
 
             String createdAt = json.get("authored_date").asText();
             LocalDate date = ZonedDateTime.parse(createdAt).toLocalDate();
