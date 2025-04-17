@@ -9,13 +9,13 @@ import java.time.ZonedDateTime;
 @Data
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class Repository {
-    private int id;
-    private String name;
+    private final int id;
+    private final String name;
     @JsonAlias({"html_url", "web_url"})
-    private String htmlUrl;
+    private final String htmlUrl;
     @JsonAlias({"updated_at", "last_activity_at"})
-    private ZonedDateTime lastUpdated;
-    private String description;
-    private String language;
+    private final ZonedDateTime lastUpdated;
+    private final String description;
+    private final String language;
     private Platform platform;
 }
