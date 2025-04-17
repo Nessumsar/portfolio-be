@@ -64,7 +64,7 @@ public class CommitService {
         HttpEntity<String> request = new HttpEntity<>(createHeaders(repository.getPlatform()));
         ResponseEntity<String> apiResponse = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
         if (apiResponse.getStatusCode() != HttpStatus.OK) {
-            log.warn("Failed to fetch events: " + apiResponse.getStatusCode());
+            log.warn("Failed to fetch events: {}", apiResponse.getStatusCode());
             return new ArrayList<>();
         }
 
@@ -72,7 +72,7 @@ public class CommitService {
         try {
             eventsArray = objectMapper.readTree(apiResponse.getBody());
         } catch (Exception e) {
-            log.warn("JsonProcessingException: {}", e);
+            log.warn("JsonProcessingException: ", e);
             return new ArrayList<>();
         }
 
@@ -151,6 +151,6 @@ public class CommitService {
                 set("Content-Type", "application/json");
                 set("Authorization", "Bearer "+GITLAB_TOKEN);
             }};
-        } else return null;
+        } else return new HttpHeaders();
     }
 }

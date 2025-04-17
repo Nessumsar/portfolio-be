@@ -11,7 +11,6 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -77,7 +76,7 @@ public class RepositoryService {
         try {
             repositories = objectMapper.readValue(apiResponse.getBody(), new TypeReference<>() {});
         } catch (JsonProcessingException e) {
-            log.warn("JsonProcessingException: {}", e);
+            log.warn("JsonProcessingException: ", e);
             return new ArrayList<>();
         }
 
@@ -97,7 +96,6 @@ public class RepositoryService {
 
     private List<Repository> filterForUpdatedWithinOneYear(List<Repository> repositories) {
         ZonedDateTime oneYearAgo = ZonedDateTime.now().minusDays(365);
-        LocalDateTime.now();
         return repositories.stream()
                 .sorted(Comparator.comparing(Repository::getLastUpdated).reversed())
                 .filter(repository -> repository.getLastUpdated().isAfter(oneYearAgo))
@@ -115,6 +113,6 @@ public class RepositoryService {
                 set("Content-Type", "application/json");
                 set("Authorization", "Bearer "+GITLAB_TOKEN);
             }};
-        } else return null;
+        } else return new HttpHeaders();
     }
 }

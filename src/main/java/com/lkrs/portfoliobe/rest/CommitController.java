@@ -2,7 +2,6 @@ package com.lkrs.portfoliobe.rest;
 
 import com.lkrs.portfoliobe.model.CommitData;
 import com.lkrs.portfoliobe.service.CommitService;
-import com.lkrs.portfoliobe.service.RepositoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,12 +13,10 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 public class CommitController {
-    private CommitService commitService;
-    private RepositoryService repositoryService;
+    private final CommitService commitService;
 
-    public CommitController(CommitService commitService, RepositoryService repositoryService) {
+    public CommitController(CommitService commitService) {
         this.commitService = commitService;
-        this.repositoryService = repositoryService;
     }
 
     @GetMapping("/commit")
