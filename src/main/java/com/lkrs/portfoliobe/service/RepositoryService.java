@@ -24,15 +24,13 @@ public class RepositoryService {
     private String GITHUB_URL;
     @Value("${gitlab.repo.url}")
     private String GITLAB_URL;
-    @Value("${github.access.token}")
-    private String GITHUB_TOKEN;
-    @Value("${gitlab.access.token}")
-    private String GITLAB_TOKEN;
 
     private final ObjectMapper objectMapper;
+    private RestTemplate restTemplate;
 
-    public RepositoryService(ObjectMapper objectMapper) {
+    public RepositoryService(ObjectMapper objectMapper, RestTemplate restTemplate) {
         this.objectMapper = objectMapper;
+        this.restTemplate = restTemplate;
     }
 
     public List<Repository> getLatestSixRepositories() {
@@ -63,11 +61,9 @@ public class RepositoryService {
 
     private List<Repository> getRepositoriesFromHost(Platform platform) {
         List<Repository> repositories;
-        RestTemplate restTemplate = new RestTemplate();
 
         String url = platform.equals(Platform.GITHUB) ? GITHUB_URL : GITLAB_URL;
-        HttpEntity<String> request = new HttpEntity<>(createHeaders(platform));
-        ResponseEntity<String> apiResponse = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+        ResponseEntity<String> apiResponse = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
         if (apiResponse.getStatusCode() != HttpStatus.OK) {
             log.warn("ApiResponse code is not 200: {}", apiResponse.getStatusCode());
             return new ArrayList<>();
@@ -100,19 +96,5 @@ public class RepositoryService {
                 .sorted(Comparator.comparing(Repository::getLastUpdated).reversed())
                 .filter(repository -> repository.getLastUpdated().isAfter(oneYearAgo))
                 .toList();
-    }
-
-    private HttpHeaders createHeaders(Platform platform) {
-        if (platform.equals(Platform.GITHUB)) {
-            return new HttpHeaders() {{
-                set("Content-Type", "application/json");
-                set("Authorization", "Bearer "+GITHUB_TOKEN);
-            }};
-        } else if (platform.equals(Platform.GITLAB)) {
-            return new HttpHeaders() {{
-                set("Content-Type", "application/json");
-                set("Authorization", "Bearer "+GITLAB_TOKEN);
-            }};
-        } else return new HttpHeaders();
     }
 }

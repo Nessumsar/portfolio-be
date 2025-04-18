@@ -25,17 +25,15 @@ public class CommitService {
     private String GITHUB_URL;
     @Value("${gitlab.commits.url}")
     private String GITLAB_URL;
-    @Value("${github.access.token}")
-    private String GITHUB_TOKEN;
-    @Value("${gitlab.access.token}")
-    private String GITLAB_TOKEN;
 
     private final ObjectMapper objectMapper;
     private final RepositoryService repositoryService;
+    private final RestTemplate restTemplate;
 
-    public CommitService(ObjectMapper objectMapper, RepositoryService repositoryService) {
+    public CommitService(ObjectMapper objectMapper, RepositoryService repositoryService, RestTemplate restTemplate) {
         this.objectMapper = objectMapper;
         this.repositoryService = repositoryService;
+        this.restTemplate = restTemplate;
     }
 
     public List<CommitData> getAllCommitData() {
@@ -50,8 +48,6 @@ public class CommitService {
 
 
     public List<CommitData> fetchCommitsOnRepository(Repository repository) {
-        RestTemplate restTemplate = new RestTemplate();
-
         String url;
         if (repository.getPlatform().equals(Platform.GITHUB)) {
             url = GITHUB_URL;
@@ -61,8 +57,7 @@ public class CommitService {
             url = url.replace(":id", String.valueOf(repository.getId()));
         }
 
-        HttpEntity<String> request = new HttpEntity<>(createHeaders(repository.getPlatform()));
-        ResponseEntity<String> apiResponse = restTemplate.exchange(url, HttpMethod.GET, request, String.class);
+        ResponseEntity<String> apiResponse = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
         if (apiResponse.getStatusCode() != HttpStatus.OK) {
             log.warn("Failed to fetch events: {}", apiResponse.getStatusCode());
             return new ArrayList<>();
@@ -141,19 +136,5 @@ public class CommitService {
                     return cd;
                 })
                 .toList();
-    }
-
-    private HttpHeaders createHeaders(Platform platform) {
-        if (platform.equals(Platform.GITHUB)) {
-            return new HttpHeaders() {{
-                set("Content-Type", "application/json");
-                set("Authorization", "Bearer "+GITHUB_TOKEN);
-            }};
-        } else if (platform.equals(Platform.GITLAB)) {
-            return new HttpHeaders() {{
-                set("Content-Type", "application/json");
-                set("Authorization", "Bearer "+GITLAB_TOKEN);
-            }};
-        } else return new HttpHeaders();
     }
 }
