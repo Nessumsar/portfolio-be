@@ -46,18 +46,8 @@ public class CommitService {
         return aggregateCommits(allCommits);
     }
 
-
     public List<CommitData> fetchCommitsOnRepository(Repository repository) {
-        String url;
-        if (repository.getPlatform().equals(Platform.GITHUB)) {
-            url = GITHUB_URL;
-            url = url.replace(":repository", repository.getName());
-        } else {
-            url = GITLAB_URL;
-            url = url.replace(":id", String.valueOf(repository.getId()));
-        }
-
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
+        ResponseEntity<String> response = restTemplate.exchange(getUrl(repository), HttpMethod.GET, null, String.class);
         if (response.getStatusCode() != HttpStatus.OK) {
             log.warn("Failed to fetch events: {}", response.getStatusCode());
             return new ArrayList<>();
@@ -78,6 +68,17 @@ public class CommitService {
         }
     }
 
+    private String getUrl(Repository repository) {
+        String url;
+        if (repository.getPlatform().equals(Platform.GITHUB)) {
+            url = GITHUB_URL;
+            return url.replace(":repository", repository.getName());
+        } else {
+            url = GITLAB_URL;
+            return url.replace(":id", String.valueOf(repository.getId()));
+        }
+    }
+
     private static List<CommitData> processGitLabEvent(JsonNode eventsArray, Repository repository) {
         List<CommitData> result = new ArrayList<>();
         for (JsonNode json : eventsArray) {
@@ -87,7 +88,6 @@ public class CommitService {
 
             String createdAt = json.get("authored_date").asText();
             LocalDate date = ZonedDateTime.parse(createdAt).toLocalDate();
-
             CommitData commitData = new CommitData(repository.getId(), date, repository.getPlatform());
             result.add(commitData);
         }

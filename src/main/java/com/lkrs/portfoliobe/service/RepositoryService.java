@@ -43,7 +43,6 @@ public class RepositoryService {
         return filterForUpdatedWithinOneYear(allRepos);
     }
 
-
     public List<Repository>  getAllRepositories() {
         List<Repository> githubRepos = getRepositoriesFromHost(Platform.GITHUB);
         List<Repository> gitlabRepos = getRepositoriesFromHost(Platform.GITLAB);
@@ -60,8 +59,6 @@ public class RepositoryService {
     }
 
     private List<Repository> getRepositoriesFromHost(Platform platform) {
-        List<Repository> repositories;
-
         String url = platform.equals(Platform.GITHUB) ? GITHUB_URL : GITLAB_URL;
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
         if (response.getStatusCode() != HttpStatus.OK) {
@@ -69,15 +66,12 @@ public class RepositoryService {
             return new ArrayList<>();
         }
 
+        List<Repository> repositories;
         try {
             repositories = objectMapper.readValue(response.getBody(), new TypeReference<>() {});
         } catch (JsonProcessingException e) {
             log.warn("JsonProcessingException: ", e);
             return new ArrayList<>();
-        }
-
-        if (repositories.isEmpty()) {
-            log.warn("Repository is empty");
         }
         repositories.forEach(repo -> repo.setPlatform(platform));
         return repositories;
