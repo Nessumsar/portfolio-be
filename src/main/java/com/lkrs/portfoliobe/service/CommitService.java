@@ -100,6 +100,9 @@ public class CommitService {
             JsonNode commit = json.get("commit");
             String createdAt = commit.get("author").get("date").asText();
             LocalDate date = ZonedDateTime.parse(createdAt).toLocalDate();
+            if (date.isBefore(LocalDate.now().minusYears(1))) {
+                continue;
+            }
             CommitData commitData = new CommitData(repository.getId(), date, repository.getPlatform());
             result.add(commitData);
         }
