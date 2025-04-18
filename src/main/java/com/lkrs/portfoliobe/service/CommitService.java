@@ -57,15 +57,15 @@ public class CommitService {
             url = url.replace(":id", String.valueOf(repository.getId()));
         }
 
-        ResponseEntity<String> apiResponse = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
-        if (apiResponse.getStatusCode() != HttpStatus.OK) {
-            log.warn("Failed to fetch events: {}", apiResponse.getStatusCode());
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
+        if (response.getStatusCode() != HttpStatus.OK) {
+            log.warn("Failed to fetch events: {}", response.getStatusCode());
             return new ArrayList<>();
         }
 
         JsonNode eventsArray;
         try {
-            eventsArray = objectMapper.readTree(apiResponse.getBody());
+            eventsArray = objectMapper.readTree(response.getBody());
         } catch (Exception e) {
             log.warn("JsonProcessingException: ", e);
             return new ArrayList<>();
@@ -81,10 +81,6 @@ public class CommitService {
     private static List<CommitData> processGitLabEvent(JsonNode eventsArray, Repository repository) {
         List<CommitData> result = new ArrayList<>();
         for (JsonNode json : eventsArray) {
-            String author = json.get("author_name").asText();
-            if (!"Nessumsar".equals(author)) {
-                continue;
-            }
             if (json.get("title").asText().contains("Merge remote-tracking branch")) {
                 continue;
             }
@@ -102,12 +98,6 @@ public class CommitService {
         List<CommitData> result = new ArrayList<>();
         for (JsonNode json : eventsArray) {
             JsonNode commit = json.get("commit");
-
-            String author = commit.get("author").get("name").asText();
-            if (!"Nessumsar".equals(author)) {
-                continue;
-            }
-
             String createdAt = commit.get("author").get("date").asText();
             LocalDate date = ZonedDateTime.parse(createdAt).toLocalDate();
             CommitData commitData = new CommitData(repository.getId(), date, repository.getPlatform());

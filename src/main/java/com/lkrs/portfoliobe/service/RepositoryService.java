@@ -63,14 +63,14 @@ public class RepositoryService {
         List<Repository> repositories;
 
         String url = platform.equals(Platform.GITHUB) ? GITHUB_URL : GITLAB_URL;
-        ResponseEntity<String> apiResponse = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
-        if (apiResponse.getStatusCode() != HttpStatus.OK) {
-            log.warn("ApiResponse code is not 200: {}", apiResponse.getStatusCode());
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, null, String.class);
+        if (response.getStatusCode() != HttpStatus.OK) {
+            log.warn("Response code is not 200: {}", response.getStatusCode());
             return new ArrayList<>();
         }
 
         try {
-            repositories = objectMapper.readValue(apiResponse.getBody(), new TypeReference<>() {});
+            repositories = objectMapper.readValue(response.getBody(), new TypeReference<>() {});
         } catch (JsonProcessingException e) {
             log.warn("JsonProcessingException: ", e);
             return new ArrayList<>();
